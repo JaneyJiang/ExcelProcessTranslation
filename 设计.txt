@@ -1,0 +1,10 @@
+This is going to be a software that is used for process excel string data , do part translation for the user.
+1.We need a section control for input file as sentences
+2.We need a section control for load the translated dict, which can be system dict to replace the sentence words.
+ability to add and when confilict will ask when to replace.
+3.We need to have the software install and run on Windows
+4.We need a section to process similiar.
+
+用语集用dict保存。
+
+if you need to have the software install and run on serveral os. you need choose wpf Framework to be  .net3.0, I don't know why, just told.
