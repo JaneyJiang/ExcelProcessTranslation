@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelProcess", "ExcelProces
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FuncLibrary", "FuncLibrary\FuncLibrary.csproj", "{2EC1F86B-2CCF-4D89-83FF-AFAC034B2119}"
 EndProject
-Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Setup", "Setup\Setup.wapproj", "{DEADC886-1DB2-4856-96CC-96B5D35E675D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,24 +41,6 @@ Global
 		{2EC1F86B-2CCF-4D89-83FF-AFAC034B2119}.Release|x64.Build.0 = Release|Any CPU
 		{2EC1F86B-2CCF-4D89-83FF-AFAC034B2119}.Release|x86.ActiveCfg = Release|Any CPU
 		{2EC1F86B-2CCF-4D89-83FF-AFAC034B2119}.Release|x86.Build.0 = Release|Any CPU
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Debug|x64.ActiveCfg = Debug|x64
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Debug|x64.Build.0 = Debug|x64
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Debug|x64.Deploy.0 = Debug|x64
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Debug|x86.ActiveCfg = Debug|x86
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Debug|x86.Build.0 = Debug|x86
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Debug|x86.Deploy.0 = Debug|x86
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Release|x64.ActiveCfg = Release|x64
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Release|x64.Build.0 = Release|x64
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Release|x64.Deploy.0 = Release|x64
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Release|x86.ActiveCfg = Release|x86
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Release|x86.Build.0 = Release|x86
-		{DEADC886-1DB2-4856-96CC-96B5D35E675D}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

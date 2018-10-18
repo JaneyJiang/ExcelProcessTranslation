@@ -26,7 +26,6 @@ namespace ExcelProcess
         public MainWindow()
         {
             InitializeComponent();
-            //connStr = "Provider=Microsoft.ACE.OLEDB.12.0; Extended Properties = 'Excel 12.0 Xml;HDR=YES;IMEX=1;MAXSCANROWS=0'";
             tablelist = new List<System.Data.DataTable>();
         }
 
@@ -44,28 +43,16 @@ namespace ExcelProcess
             }
             else
             {
-                filepath = "";
+                filepath = null;
                 txbText.Text = "open no file";
             }
-            //获取文件扩展名来获得不同的连接设置
-            string strExtension = System.IO.Path.GetExtension(filepath);
-            //Excel与Excel的连接
-            //HDR=Yes,这代表第一行是标题，不作为数据使用
-            //IMEx0:写入，1：读取，2：读取 写入
-            switch (strExtension)
+            if (filepath != null)
             {
-                case ".xlsx":
-                    connStr = "Provider=Microsoft.ACE.OLEDB.12.0;Extended Properties='Excel 12.0 Xml;HDR=YES;IMEX=1;MAXSCANROWS=0';";
-                    break;
-                default:
-                    break;
+                ConnectExcel connExcel = new ConnectExcel(filepath);
+                sheetnames = connExcel.GetSheetsNames();
+                tablelist = connExcel.GetTableList();
             }
-            if (connStr == null)
-                throw new Exception("input file type error");
-            else
-                connStr += "Data Source=" + filepath;
-
-            sheetnames = GetSchemaTable(connStr);
+           
             cbSelect_set(sender, e);
         }
         private void cbSelect_set(object sender, EventArgs e)
@@ -102,40 +89,6 @@ namespace ExcelProcess
                 }
             }
 
-        }
-
-        private string[] GetSchemaTable(string connectionString)
-        {
-
-            using (OleDbConnection connection = new
-                       OleDbConnection(connectionString))
-            {
-                connection.Open();
-                System.Data.DataTable schemaTable = connection.GetOleDbSchemaTable(
-                    OleDbSchemaGuid.Tables,
-                    new object[] { null, null, null, "TABLE" });
-                if (schemaTable == null)
-                    return null;
-                string[] excelSheets = new string[schemaTable.Rows.Count];
-
-                int i = 0;
-                foreach (System.Data.DataRow dr in schemaTable.Rows)
-                {
-                    string sheetname = dr["TABLE_NAME"].ToString().Trim();
-                    excelSheets[i] = sheetname;
-                    string sql = "SELECT * FROM [" + sheetname + "]";
-                    System.Data.DataSet ds = new DataSet();
-                    ds.Clear();
-                    OleDbDataAdapter data = new OleDbDataAdapter(sql, connStr);
-                    data.Fill(ds);
-                    tablelist.Add(ds.Tables[0]);
-                    tablelist[i].TableName = sheetname;
-                    Console.WriteLine(tablelist[i].TableName);
-                    Console.WriteLine(i);
-                    i += 1;
-                }
-                return excelSheets; ;
-            }
         }
 
         //CreatEmptyTable:根据给定的表名和列名，创建空的Table。给定的名字中，第一个是表格名，第二个开始就是列名
@@ -207,7 +160,7 @@ namespace ExcelProcess
             }
             tb.DefaultView.Sort = tb.Columns[3] + " ASC";
             tb = tb.DefaultView.ToTable();
-            DataTabletoCsv(tb, "./" + sheetnames[0] + "origin.csv");
+            CsvTable.DataTableToCsv(tb, "./" + sheetnames[0] + "origin.csv");
 
             //according to the whole table and string lenthg information to generate simiality table.
             //DataTable simTb = tb.Clone();//复制原表的结构
@@ -244,7 +197,7 @@ namespace ExcelProcess
                         count += 1;
                     }
                     else {
-                        if (Convert.ToSingle(tb.Rows[i]["srcLen"]) / Convert.ToSingle(tb.Rows[j]["srcLen"]) < 0.8)
+                        if (Convert.ToSingle(tb.Rows[i]["srcLen"]) / Convert.ToSingle(tb.Rows[j]["srcLen"]) < 0.65)
                             break;
                     }
                 }
@@ -252,7 +205,7 @@ namespace ExcelProcess
 
 
             }
-            DataTabletoCsv(simTb, "./" + sheetnames[0] + "_sim.csv");
+            CsvTable.DataTableToCsv(simTb, "./" + sheetnames[0] + "_sim.csv");
 
             SplitSimTb(simTb);
 
@@ -260,7 +213,7 @@ namespace ExcelProcess
             DataTable single = CsvToDataTable(sheetnames[0] + "_single.csv");
             simTb= GetTogether(simTb, group, single);
             simTb = FollowIndex(simTb);
-            DataTabletoCsv(simTb, "./" + sheetnames[0] + "_trans.csv");
+            CsvTable.DataTableToCsv(simTb, "./" + sheetnames[0] + "_trans.csv");
 
             return exclueSheet;
         }
@@ -376,44 +329,10 @@ namespace ExcelProcess
                 }
                
             }
-            DataTabletoCsv(group, "./" + sheetnames[0] + "_group.csv");
-            DataTabletoCsv(single, "./" + sheetnames[0] + "_single.csv");
+            CsvTable.DataTableToCsv(group, "./" + sheetnames[0] + "_group.csv");
+            CsvTable.DataTableToCsv(single, "./" + sheetnames[0] + "_single.csv");
         }
-        private void DataTabletoCsv(System.Data.DataTable dt, string path)
-
-        {
-            StreamWriter sw = null;
-
-            //这里的文件打开异常不需要捕获太早，当然可以通过返回bool型来对异常进行判断处理。
-            sw = new StreamWriter(path, false, Encoding.GetEncoding("utf-8"));
-
-
-            StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < dt.Columns.Count; i++)
-            {
-                sb.Append(dt.Columns[i].ColumnName.ToString() + ",");
-            }
-
-            sb.Append(Environment.NewLine);
-
-            for (int m = 0; m < dt.Rows.Count; m++)
-            {
-                //System.Windows.Forms.Application.DoEvents();
-                for (int n = 0; n < dt.Columns.Count; n++)
-                {
-                    sb.Append(dt.Rows[m][n].ToString() + ",");
-                }
-
-                sb.Append(Environment.NewLine);
-
-            }
-            sw.Write(sb.ToString());
-            sw.Flush();
-            sw.Close();
-
-        }
-
+ 
         private System.Data.DataTable CsvToDataTable(string path)
         {
             Dictionary<string, string> typeDict = new Dictionary<string, string>{ { "id","System.Int32"},{ "strLen","System.Int32"},{"group","System.Int32"} };
