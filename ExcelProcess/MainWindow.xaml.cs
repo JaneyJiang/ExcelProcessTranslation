@@ -19,7 +19,6 @@ namespace ExcelProcess
     public partial class MainWindow : System.Windows.Window
     {
         private List<System.Data.DataTable> tablelist = null;
-        private string connStr = null;
         // private string[] filepaths;//当需要打开多个文件获得多个路径的时候可以用这个
         private string filepath;
         private string[] sheetnames;
@@ -212,6 +211,7 @@ namespace ExcelProcess
             DataTable group = CsvToDataTable(sheetnames[0] + "_group.csv");
             DataTable single = CsvToDataTable(sheetnames[0] + "_single.csv");
             simTb= GetTogether(simTb, group, single);
+            CsvTable.DataTableToCsv(simTb, "./" + sheetnames[0] + "_sim.csv");
             simTb = FollowIndex(simTb);
             CsvTable.DataTableToCsv(simTb, "./" + sheetnames[0] + "_trans.csv");
 
@@ -267,26 +267,29 @@ namespace ExcelProcess
                 }
                 if (id == singleId)
                 {
-                    simRow.BeginEdit();
+                    /*simRow.BeginEdit();
                     simRow["transTo"] = singleRows[singleIdx]["transTo"];
-                    simRow.EndEdit();
+                    simRow.EndEdit();*/
+                    CopyCell(simRow, "transTo", singleRows[singleIdx]["transTo"]);
 
                     singleIdx++;
                 }
                 else {
                     if (id == groupId)
                     {
-                        simRow.BeginEdit();
-                        simRow["transTo"] = groupRows[groupIdx]["transTo"];
-                        simRow.EndEdit();
+                        /*simRow.BeginEdit();
+                         simRow["transTo"] = groupRows[groupIdx]["transTo"];
+                        simRow.EndEdit();*/
+                        CopyCell(simRow, "transTo", groupRows[groupIdx]["transTo"]);
                         groupcount = (int)groupRows[groupIdx]["group"];
                     }
                     else {
                         if (groupcount > 0)
                         {
-                            simRow.BeginEdit();
+                            /*simRow.BeginEdit();
                             simRow["transTo"] = groupRows[groupIdx]["transTo"];
-                            simRow.EndEdit();
+                            simRow.EndEdit();*/
+                            CopyCell(simRow, "transTo", groupRows[groupIdx]["transTo"]);
                             groupcount--;
                         }
                         if (groupcount == 0)
@@ -299,6 +302,14 @@ namespace ExcelProcess
 
             }
             return simTb;
+        }
+
+        public static void CopyCell(DataRow dr, string colName, object cell)
+        {
+            dr.BeginEdit();
+            //simRow["transTo"] = singleRows[singleRowCount]["transTo"];
+            dr[colName] = cell;
+            dr.EndEdit();
         }
         private void SplitSimTb(DataTable simTb)//把sim表拆分成single和group两张表，供翻译补齐翻译内容
         {
