@@ -68,6 +68,8 @@ namespace ExcelProcess
             _tranTo = trans;
         }
 
+
+        //place to add translation
         public DataRow getRow(DataRow newRow,RowFormat k)
         {
             DataRow row;

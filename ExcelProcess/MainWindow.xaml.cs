@@ -18,10 +18,16 @@ namespace ExcelProcess
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
+        //第一块功能区的私有变量
         private List<System.Data.DataTable> tablelist = null;
         // private string[] filepaths;//当需要打开多个文件获得多个路径的时候可以用这个
         private string filepath;
         private string[] sheetnames;
+
+        //第二块功能区的私有变量
+        private string[] mergeFiles;
+
+
         public MainWindow()
         {
             InitializeComponent();
@@ -50,9 +56,9 @@ namespace ExcelProcess
                 ConnectExcel connExcel = new ConnectExcel(filepath);
                 sheetnames = connExcel.GetSheetsNames();
                 tablelist = connExcel.GetTableList();
+                cbSelect_set(sender, e);
             }
            
-            cbSelect_set(sender, e);
         }
         private void cbSelect_set(object sender, EventArgs e)
         {
@@ -75,7 +81,7 @@ namespace ExcelProcess
                 txbText.Text += "\n Processing " + sheetnames[0] + "...";
                 try
                 {
-                    List<string> delet = MakeTable((string)cbSelectLabel.SelectedValue, (string)cbSelect.SelectedValue);
+                    List<string> delet = MakeTables((string)cbSelectLabel.SelectedValue, (string)cbSelect.SelectedValue);
                     foreach (string name in delet)
                     {
                         txbText.Text += "   exclued file: " + name;
@@ -90,39 +96,14 @@ namespace ExcelProcess
 
         }
 
-        //CreatEmptyTable:根据给定的表名和列名，创建空的Table。给定的名字中，第一个是表格名，第二个开始就是列名
-        private DataTable CreatEmptyTable(string[] names, string[] types)
-        {
-            int i = 0;
-            DataTable tb = new DataTable((string)names[i]);
-            for (i = 1; i < names.Length; i++)
-            {
-                DataColumn col = newCol(types[i - 1], (string)names[i]);
-                tb.Columns.Add(col);
-                //添加主键id
-                if ((string)names[i] == "id")
-                {
-                    tb.PrimaryKey = new DataColumn[] { col };
-                }
-            }
-            return tb;
-        }
-        System.Data.DataColumn newCol(string type, string colname)
-        {
-            System.Data.DataColumn col = new System.Data.DataColumn();
-            col.DataType = System.Type.GetType(type);
-            col.ColumnName = colname;
-            return col;
-        }
-
         //创建一个空表格结构，其中，表格内包括 id， labelCol，srcCol，strLen,其中id是对记个数的从1开始，strLen是对srcCol的长度来记长度的。
-        private List<string> MakeTable(string labelCol, string sourceCol)
+        private List<string> MakeTables(string labelCol, string sourceCol)
         {
             List<string> exclueSheet = new List<string>();
             //create a DataTable
-            string[] tb_names = { "all", "id", labelCol, sourceCol, "srcLen" };
+            string[] tb_cols = { "id", labelCol, sourceCol, "srcLen" };
             string[] tb_types = { "System.Int32", "System.String", "System.String", "System.Int32" };
-            System.Data.DataTable tb = CreatEmptyTable(tb_names, tb_types);
+            System.Data.DataTable tb = CsvTable.CreatEmptyTable("all",tb_cols, tb_types);
             DataRow row;
             string preProcess = null;
             int t = 1;//if you have only one sheet than it matches your index.
@@ -163,9 +144,9 @@ namespace ExcelProcess
 
             //according to the whole table and string lenthg information to generate simiality table.
             //DataTable simTb = tb.Clone();//复制原表的结构
-            string[] sim_names = { "simData", "id", labelCol, sourceCol, "srcLen", "group", "transTo" };
+            string[] sim_cols = { "id", labelCol, sourceCol, "srcLen", "group", "transTo" };
             string[] sim_types = { "System.Int32", "System.String", "System.String", "System.Int32", "System.Int32", "System.String" };
-            DataTable simTb = CreatEmptyTable(sim_names, sim_types);
+            DataTable simTb = CsvTable.CreatEmptyTable("simData",sim_cols, sim_types);
             Hashtable simpair = new Hashtable();
             HashSet<int> cmplist = new HashSet<int>();
             int count = 0;
@@ -208,12 +189,13 @@ namespace ExcelProcess
 
             SplitSimTb(simTb);
 
-            DataTable group = CsvToDataTable(sheetnames[0] + "_group.csv");
+            /*DataTable group = CsvToDataTable(sheetnames[0] + "_group.csv");
             DataTable single = CsvToDataTable(sheetnames[0] + "_single.csv");
-            simTb= GetTogether(simTb, group, single);
+           // simTb= GetTogether(simTb, group, single);
+            simTb = CsvTable.MergeTable(group, single, simTb, "transTo");
             CsvTable.DataTableToCsv(simTb, "./" + sheetnames[0] + "_sim.csv");
             simTb = FollowIndex(simTb);
-            CsvTable.DataTableToCsv(simTb, "./" + sheetnames[0] + "_trans.csv");
+            CsvTable.DataTableToCsv(simTb, "./" + sheetnames[0] + "_trans.csv");*/
 
             return exclueSheet;
         }
@@ -243,82 +225,14 @@ namespace ExcelProcess
                 return tb;
         }
 
-        //把翻译好的Group和single整合到simTb表中。
-        private DataTable GetTogether(DataTable simTb, DataTable group, DataTable single)
-        {
-            DataRowCollection groupRows = group.Rows;
-            DataRowCollection singleRows = single.Rows;
-            DataRowCollection simRows = simTb.Rows;
-            int singleIdx = 0;
-            int groupIdx = 0;
-            int groupId = 0;
-            int singleId = 0;
-            int groupcount = -1;
-            foreach(DataRow simRow in simRows)
-            {
-                int id = (int)simRow[0];
-                if(groupIdx < group.Rows.Count)
-                {
-                    groupId = (int)groupRows[groupIdx][0];
-                }
-                if (singleIdx < single.Rows.Count)
-                {
-                    singleId = (int)singleRows[singleIdx][0];
-                }
-                if (id == singleId)
-                {
-                    /*simRow.BeginEdit();
-                    simRow["transTo"] = singleRows[singleIdx]["transTo"];
-                    simRow.EndEdit();*/
-                    CopyCell(simRow, "transTo", singleRows[singleIdx]["transTo"]);
-
-                    singleIdx++;
-                }
-                else {
-                    if (id == groupId)
-                    {
-                        /*simRow.BeginEdit();
-                         simRow["transTo"] = groupRows[groupIdx]["transTo"];
-                        simRow.EndEdit();*/
-                        CopyCell(simRow, "transTo", groupRows[groupIdx]["transTo"]);
-                        groupcount = (int)groupRows[groupIdx]["group"];
-                    }
-                    else {
-                        if (groupcount > 0)
-                        {
-                            /*simRow.BeginEdit();
-                            simRow["transTo"] = groupRows[groupIdx]["transTo"];
-                            simRow.EndEdit();*/
-                            CopyCell(simRow, "transTo", groupRows[groupIdx]["transTo"]);
-                            groupcount--;
-                        }
-                        if (groupcount == 0)
-                        {
-                            groupIdx++;
-                            groupcount--;
-                        }
-                    }
-                }
-
-            }
-            return simTb;
-        }
-
-        public static void CopyCell(DataRow dr, string colName, object cell)
-        {
-            dr.BeginEdit();
-            //simRow["transTo"] = singleRows[singleRowCount]["transTo"];
-            dr[colName] = cell;
-            dr.EndEdit();
-        }
         private void SplitSimTb(DataTable simTb)//把sim表拆分成single和group两张表，供翻译补齐翻译内容
         {
-            string[] sig_names = { "single","id", "label", "src", "transTo" };
-            string[] group_names = { "group","id", "label", "src", "group","transTo" };
+            string[] sig_cols = { "id", "label", "src", "transTo" };
+            string[] group_cols = { "id", "label", "src", "group","transTo" };
             string[] sig_types = { "System.Int32", "System.String", "System.String" ,"System.String" };
             string[] group_types = { "System.Int32", "System.String", "System.String", "System.Int32","System.String" };
-            DataTable single = CreatEmptyTable(sig_names, sig_types);
-            DataTable group = CreatEmptyTable(group_names,group_types);
+            DataTable single = CsvTable.CreatEmptyTable("single",sig_cols, sig_types);
+            DataTable group = CsvTable.CreatEmptyTable("group",group_cols,group_types);
             foreach (DataRow dr in simTb.Rows)
             {
                 DataRow row;
@@ -344,61 +258,145 @@ namespace ExcelProcess
             CsvTable.DataTableToCsv(single, "./" + sheetnames[0] + "_single.csv");
         }
  
-        private System.Data.DataTable CsvToDataTable(string path)
-        {
-            Dictionary<string, string> typeDict = new Dictionary<string, string>{ { "id","System.Int32"},{ "strLen","System.Int32"},{"group","System.Int32"} };
-            DataTable dt = new DataTable();
-            FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
-            StreamReader sr = new StreamReader(fs, System.Text.Encoding.Default);
-            //记录每次读取的一行记录
-            string strLine = "";
-            //记录每行记录中的各字段内容
-            string[] aryLine;
-            //标示列数
-            int columnCount = 0;
-            //标示是否是读取的第一行
-            bool IsFirst = true;
-            //逐行读取CSV中的数据
-            while ((strLine = sr.ReadLine()) != null)
-            {
-                aryLine = strLine.Split(',');
-                if (IsFirst == true)
-                {
-                    IsFirst = false;
-                    columnCount = aryLine.Length;
-                    for (int i = 0; i < columnCount; i++)
-                    {
-                        DataColumn dc;
-                        if (typeDict.ContainsKey(aryLine[i]))
-                        {
-                            dc = newCol(typeDict[aryLine[i]], aryLine[i]);
-                        }
-                        else {
-                            dc = newCol("System.String", aryLine[i]);
-                        }
-                        dt.Columns.Add(dc);
-                    }
-                }
-                else
-                {
-                    DataRow dr = dt.NewRow();
-                    for (int j = 0; j < columnCount; j++)
-                    {
-                        dr[j] = aryLine[j];
-                    }
-                    dt.Rows.Add(dr);
-                }
-            }
-            sr.Close();
-            fs.Close();
-            return dt;
-        }
         private string Translate(string sent)
         {
             return sent;
         }
 
+        private void btnOpenMergeFile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Multiselect = true;
+            fileDialog.Filter = "Comma-Separated File|*.csv;";
+            fileDialog.DefaultExt = ".csv";
+            Nullable<bool> dialogOk = fileDialog.ShowDialog();
+            if (dialogOk == true)
+            {
+                mergeFileNames.Text = null;
+                //filePath = fileDialog.FileNames;
+                foreach (string name in fileDialog.FileNames)
+                    mergeFileNames.Text += name + "\n";
+                mergeFiles = fileDialog.FileNames;
+            }
+            else
+            {
+                mergeFiles = null;
+                txbText.Text = "open no file";
+            }
+            if (mergeFiles!=null && mergeFiles.Length < 2)
+            {
+                throw new Exception("merge need at least two files");
+            }
+        }
 
+        private void btnMergeFile_Click(object sender, RoutedEventArgs e)
+        {
+            DataTable group=null;
+            DataTable single=null;
+            DataTable similarity=null;
+            //会有两种情况，一种延用当前的表格，一种新输入文件
+            if (mergeFiles == null)
+            {//如果不额外输入文件，即延用当前产生的表格
+                if (sheetnames != null)
+                {
+                    //MergeAll(sheetnames[0] + "_group.csv", sheetnames[0] + "_single.csv", sheetnames[0] + "_sim.csv");
+                    group = CsvTable.CsvToDataTable(sheetnames[0] + "_group.csv");
+                    single = CsvTable.CsvToDataTable(sheetnames[0] + "_single.csv");
+                    similarity = CsvTable.CsvToDataTable(sheetnames[0] + "_sim.csv");
+                    // simTb= GetTogether(simTb, group, single);
+                    similarity = CsvTable.MergeTable(group, single, similarity, "transTo");
+                    CsvTable.DataTableToCsv(similarity, "./" + sheetnames[0] + "_sim.csv");
+                    mergeFileNames.Text +=  "Merge Finished!\n";
+                }
+                else {
+                    mergeFileNames.Text += "\n" + "Merge Nothing!";
+                }
+            }
+            else
+            {//如果额外输入文件
+                string simName = null;
+                foreach (string name in mergeFiles)
+                {
+                    string[] sArray = name.Split('_');
+                    string tailname = sArray[sArray.Length - 1];
+                    switch (tailname)
+                    {
+                        case "group.csv":
+                            group = CsvTable.CsvToDataTable(name);
+                            break;
+                        case "single.csv":
+                            single = CsvTable.CsvToDataTable(name);
+                            break;
+                        case "sim.csv":
+                            similarity = CsvTable.CsvToDataTable(name);
+                            simName = name;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                try
+                {
+                    if (mergeFiles.Length == 3)
+                    {
+                        CsvTable.MergeTable(group, single, similarity, "transTo");
+                    }
+                    else
+                    {
+                        if (group == null)
+                            CsvTable.MergeSingleTable(single, similarity, "transTo");
+                        else
+                            CsvTable.MergeGroupTable(group, similarity, "transTo");
+                    }
+                }
+                catch (Exception exception)
+                {
+                    MessageBox.Show("MergeTable: Check your merge files' format " + exception.Message);
+                    return;
+                }
+                CsvTable.DataTableToCsv(similarity, simName);
+                mergeFileNames.Text += "\n"+ "Merge Finished!";
+            }
 
+        }
+
+        private void btnOutputFull_Click(object sender, RoutedEventArgs e)
+        {
+            DataTable similarity;
+            DataTable full;
+            if (mergeFiles == null)
+            {
+                if (sheetnames[0] != null)
+                {
+                    similarity = CsvTable.CsvToDataTable(sheetnames[0] + "_sim.csv");
+                    full = FollowIndex(similarity);
+                    CsvTable.DataTableToCsv(full, "./" + sheetnames[0] + "_trans.csv");
+                    mergeFileNames.Text += "Output Finished!";
+                }
+                else
+                {
+                    mergeFileNames.Text += "Output Nothing!";
+                }
+            }
+            else
+            {
+                foreach (string name in mergeFiles)
+                {
+                    string[] sArray = name.Split('_');
+                    string tailname = sArray[sArray.Length - 1];
+                    if (tailname == "sim.csv")
+                    {
+                        similarity = CsvTable.CsvToDataTable(name);
+                        full = FollowIndex(similarity);
+                        CsvTable.DataTableToCsv(full, name.Replace("_sim.csv", "_trans.csv"));
+                        mergeFileNames.Text += "Output Finished!";
+                        return;
+                    }
+
+                }
+                mergeFileNames.Text += "Output Nothing!";
+            }          
+
+        }
     }
 }

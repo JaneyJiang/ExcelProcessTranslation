@@ -57,6 +57,7 @@
     <Compile Include="ConnectExcel.cs" />
     <Compile Include="CsvTable.cs" />
     <Compile Include="RowData.cs" />
+    <Compile Include="Translation.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
