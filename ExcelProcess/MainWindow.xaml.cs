@@ -23,6 +23,9 @@ namespace ExcelProcess
         // private string[] filepaths;//当需要打开多个文件获得多个路径的时候可以用这个
         private string filepath;
         private string[] sheetnames;
+        private double simRate = 0.85;//相似度大小
+        private double lenRate = 0.65;//句子长度比
+        private Dictionary<string, string> dict = Translation.TranslationDict();
 
         //第二块功能区的私有变量
         private string[] mergeFiles;
@@ -36,7 +39,7 @@ namespace ExcelProcess
 
         private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog fileDialog = new OpenFileDialog();
+            /*OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = false;
             fileDialog.Filter = "Excel Files|*.xlsx;";
             fileDialog.DefaultExt = ".xlsx";
@@ -50,6 +53,17 @@ namespace ExcelProcess
             {
                 filepath = null;
                 txbText.Text = "open no file";
+            }*/
+            bool multiselect = false;
+            string filter = "Excel Files|*.xlsx;";
+            string defaultExt = ".xlsx";
+            filepath = OpenFile(multiselect, filter, defaultExt);
+            if (filepath == null)
+            {
+                txbText.Text = "open no file";
+            }
+            else {
+                txbText.Text = filepath;
             }
             if (filepath != null)
             {
@@ -59,6 +73,22 @@ namespace ExcelProcess
                 cbSelect_set(sender, e);
             }
            
+        }
+        private string OpenFile(bool multiselect, string filter, string defaultExt)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Multiselect = multiselect;
+            fileDialog.Filter = filter;
+            fileDialog.DefaultExt = defaultExt;
+            Nullable<bool> dialogOk = fileDialog.ShowDialog();
+            if(dialogOk== true)
+            {
+                return fileDialog.FileName;
+            }
+            else
+            {
+                return null;
+            }
         }
         private void cbSelect_set(object sender, EventArgs e)
         {
@@ -167,7 +197,7 @@ namespace ExcelProcess
                 {
                     if (cmplist.Contains(j))
                         continue;
-                    if (Levenshtein.Jaro_Winkler((string)tb.Rows[i][sourceCol], (string)tb.Rows[j][sourceCol]) > 0.8)
+                    if (Levenshtein.Jaro_Winkler((string)tb.Rows[i][sourceCol], (string)tb.Rows[j][sourceCol]) > simRate)
                     {
                         cmplist.Add(j);
                         RowDataClass rd = new RowDataClass(tb.Rows[j], -1);
@@ -177,7 +207,7 @@ namespace ExcelProcess
                         count += 1;
                     }
                     else {
-                        if (Convert.ToSingle(tb.Rows[i]["srcLen"]) / Convert.ToSingle(tb.Rows[j]["srcLen"]) < 0.65)
+                        if (Convert.ToSingle(tb.Rows[i]["srcLen"]) / Convert.ToSingle(tb.Rows[j]["srcLen"]) < lenRate)
                             break;
                     }
                 }
@@ -242,13 +272,13 @@ namespace ExcelProcess
                     if (tag == 0)
                     {
                         RowDataClass rdc = new RowDataClass(dr);
-                        row = rdc.getRow(single.NewRow(), RowFormat.SINGLE);
+                        row = rdc.getRow(single.NewRow(), RowFormat.SINGLE,dict);
                         single.Rows.Add(row);
                     }
                     else
                     {
                         RowDataClass rdc = new RowDataClass(dr);
-                        row = rdc.getRow(group.NewRow(), RowFormat.GROUP);
+                        row = rdc.getRow(group.NewRow(), RowFormat.GROUP,dict);
                         group.Rows.Add(row);
                     }
                 }

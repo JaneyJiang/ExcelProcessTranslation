@@ -1,9 +1,11 @@
-﻿using System;
+﻿using FuncLibrary;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -62,11 +64,13 @@ namespace ExcelProcess
             //逐行读取CSV中的数据
             while ((strLine = sr.ReadLine()) != null)
             {
-                if (strLine[strLine.Length - 1] == ',')
-                    strLine = strLine.Substring(0, strLine.Length - 1);
-                aryLine = strLine.Split(',');
+                //if (strLine[strLine.Length - 1] == ',')
+                //    strLine = strLine.Substring(0, strLine.Length - 1);
+                //
+                aryLine = StringTool.splitWithoutQuotation(strLine);
                 if (IsFirst == true)
                 {
+                    //aryLine = strLine.Split(new Char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     IsFirst = false;
                     columnCount = aryLine.Length;
                     for (int i = 0; i < columnCount; i++)
@@ -85,11 +89,18 @@ namespace ExcelProcess
                 }
                 else
                 {
+                    
                     DataRow dr = dt.NewRow();
-                    for (int j = 0; j < columnCount; j++)
+                    try
                     {
-                        dr[j] = aryLine[j];
+                        for (int j = 0; j < Math.Min(aryLine.Length,columnCount); j++)
+                        {
+                            //need to add  commaRecover(string input) to dr[2]
+                            dr[j] = aryLine[j];
+                        }
                     }
+                    catch (Exception e)
+                    { continue; }
                     dt.Rows.Add(dr);
                 }
             }
@@ -120,7 +131,7 @@ namespace ExcelProcess
             foreach (DataRow dr in inTable.Rows)
             {
                 foreach (DataColumn dc in inTable.Columns)
-                {
+                {//need to add commaSet(string input)
                     sb.Append(dr[dc.ColumnName].ToString() + ",");
                 }
                 sb.Append(Environment.NewLine);
@@ -267,6 +278,53 @@ namespace ExcelProcess
             //simRow["transTo"] = singleRows[singleRowCount]["transTo"];
             dr[colName] = cell;
             dr.EndEdit();
+        }
+
+        
+        //读取两列的txt作为字典。
+        public static Dictionary<string, string> ReadDict(string path) //读txt文件 返回字典
+        {
+            if (path == "")
+                return null;
+            StreamReader sr = new StreamReader(path, Encoding.Default);
+            String line;
+            var dic = new Dictionary<string, string>();
+            try
+            {
+                while ((line = sr.ReadLine()) != null)
+                {
+                    var li = line.ToString().Split(new Char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries); ; //将一行用,分开成键值对
+                    if (dic.ContainsKey(li[0]))
+                    {
+                        dic[li[0]] = li[1];
+                    }
+                    else
+                    {
+                        dic.Add(li[0], li[1]);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return dic;
+        }
+
+        public void Write(string path,Dictionary<string, string> mydic) //将字典写入txt
+        {
+            FileStream fs = new FileStream(path, FileMode.Create);
+            StreamWriter sw = new StreamWriter(fs);
+            //开始写入
+            foreach (var d in mydic)
+            {
+                sw.Write(d.Key+ "\t" + d.Value); //键值对写入，用逗号隔开
+            }
+            //清空缓冲区
+            sw.Flush();
+            //关闭流
+            sw.Close();
+            fs.Close();
         }
     }
 }
