@@ -25,7 +25,6 @@ namespace ExcelProcess
         private string[] sheetnames;
         private double simRate = 0.85;//相似度大小
         private double lenRate = 0.65;//句子长度比
-        private Dictionary<string, string> dict = Translation.TranslationDict();
 
         //第二块功能区的私有变量
         private string[] mergeFiles;
@@ -272,13 +271,13 @@ namespace ExcelProcess
                     if (tag == 0)
                     {
                         RowDataClass rdc = new RowDataClass(dr);
-                        row = rdc.getRow(single.NewRow(), RowFormat.SINGLE,dict);
+                        row = rdc.getRow(single.NewRow(), RowFormat.SINGLE);
                         single.Rows.Add(row);
                     }
                     else
                     {
                         RowDataClass rdc = new RowDataClass(dr);
-                        row = rdc.getRow(group.NewRow(), RowFormat.GROUP,dict);
+                        row = rdc.getRow(group.NewRow(), RowFormat.GROUP);
                         group.Rows.Add(row);
                     }
                 }

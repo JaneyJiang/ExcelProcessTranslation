@@ -8,7 +8,9 @@ namespace ExcelProcess
 {
     class Translation
     {
-        public static string DoTranslation(Dictionary<string, string> dict, string sent)
+        static Dictionary<string, string> dict = CsvTable.ReadDict();
+  
+        public static string DoTranslation(string sent)
         {
             foreach (string key in dict.Keys)
             {
@@ -18,7 +20,7 @@ namespace ExcelProcess
             return sent;
         }
 
-        public static string DoTranslation(string sent, string lang)
+        public string DoTranslation(string sent, string lang)
         {
             return sent;
         }

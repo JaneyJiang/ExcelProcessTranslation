@@ -282,7 +282,7 @@ namespace ExcelProcess
 
         
         //读取两列的txt作为字典。
-        public static Dictionary<string, string> ReadDict(string path) //读txt文件 返回字典
+        public static Dictionary<string, string> ReadDict(string path="dict.txt") //读txt文件 返回字典
         {
             if (path == "")
                 return null;

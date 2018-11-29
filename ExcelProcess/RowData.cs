@@ -31,7 +31,8 @@ namespace ExcelProcess
             _id = id;
             _label = label;
             //_src = src;
-            _src = StringTool.commaSet(src);
+            // _src = StringTool.commaSet(src);
+            _src = StringTool.quotationBrace(src);
             _srcLen = src.Length;
         }
         public RowDataClass(int id, string label, string src, int group)
@@ -47,8 +48,9 @@ namespace ExcelProcess
             object[] rowArray = dr.ItemArray;
             _id = (int)rowArray[0];
             _label = (string)rowArray[1];
-           // _src = (string)rowArray[2];
-            _src = StringTool.commaSet((string)rowArray[2]);
+            _src = (string)rowArray[2];
+           // _src = StringTool.commaSet((string)rowArray[2]);
+           // _src = StringTool.quotationBrace((string)rowArray[2]);
             _srcLen = _src.Length;
             _group = group;
         }
@@ -57,8 +59,9 @@ namespace ExcelProcess
             object[] rowArray = dr.ItemArray;
             _id = (int)rowArray[0];
             _label = (string)rowArray[1];
-           // _src = (string)rowArray[2];
-            _src = StringTool.commaSet((string)rowArray[2]);
+            _src = (string)rowArray[2];
+           // _src = StringTool.commaSet((string)rowArray[2]);
+           // _src = StringTool.quotationBrace((string)rowArray[2]);
             if (rowArray.Length > 4)
             {
                 _group = (int)rowArray[4];
@@ -68,14 +71,14 @@ namespace ExcelProcess
         {
             _id = id;
             _label = label;
-            //_src = src;
-            _src = StringTool.commaSet(src);
+            _src = src;
+            //_src = StringTool.commaSet(src);
             _tranTo = trans;
         }
 
 
         //place to add translation
-        public DataRow getRow(DataRow newRow,RowFormat k)
+        public DataRow getRow(DataRow newRow,RowFormat k,Dictionary<string,string> dict=null)
         {
             DataRow row;
             row = newRow;
@@ -88,11 +91,13 @@ namespace ExcelProcess
                     row[3] = _srcLen;
                     break;
                 case RowFormat.SINGLE://这是保存没有相似组的字符串
-                    row[3] = _src;////如果有可以翻译的软件，可以直接把这个trans(src)
+                    //row[3] = _src;////如果有可以翻译的软件，可以直接把这个trans(src)
+                    row[3] = Translation.DoTranslation(_src);
                     break;
                 case RowFormat.GROUP://这是保存有相似度的主字符串
                     row[3] = _group;
-                    row[4] = _src;//如果有可以翻译的软件，可以直接把这个trans(src)
+                    //row[4] = _src;//如果有可以翻译的软件，可以直接把这个trans(src)
+                    row[4] = Translation.DoTranslation(_src);
                     break;
                 case RowFormat.SIMALL://这是对原表格中数据元素进行相似度计算和匹配。
                     row[3] = _srcLen;
