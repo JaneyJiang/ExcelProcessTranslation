@@ -9,6 +9,32 @@ namespace FuncLibrary
 {
     public class StringTool
     {
+        public static string quotationBrace(string input)
+        {
+            return "\"" + input + "\"";
+        }
+        public static string[] splitWithoutQuotation(string input)
+        {
+            string[] quo = input.Split(new Char[] { '"' }, StringSplitOptions.RemoveEmptyEntries);
+            List<string> splitItem=new List<string>();
+            for (int i = 0; i < quo.Length; i+=2)
+            {
+                string [] splits= quo[i].Split(new Char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (i == 0)
+                {
+                    splitItem = new List<string>(splits);
+                }
+                else {
+                    splitItem .Add( "\"" + quo[i - 1] + "\"");
+                    foreach (string split in splits)
+                    {
+                        splitItem.Add(split);
+                    }
+
+                }
+            }
+            return splitItem.ToArray();
+        }
         public static string commaSet(string input)
         {
             return input.Replace(",", "*:*");
