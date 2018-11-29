@@ -9,6 +9,14 @@ namespace FuncLibrary
 {
     public class StringTool
     {
+        public static string commaSet(string input)
+        {
+            return input.Replace(",", "*:*");
+        }
+        public static string commaRecover(string input)
+        {
+            return input.Replace("*:*", ",");
+        }
         //去掉字符串中的空白字符：匹配符\s(匹配任何空白字符，包括空格，制表符，换页符等，与[\f\n\t\r\v]等效)
         //如果只是去掉首位空白用input.Trim(),去掉首尾和句中的空格用input.Replace(" ","");
         public static string blankomit(string input)

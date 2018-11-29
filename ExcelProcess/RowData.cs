@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FuncLibrary;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace ExcelProcess
         TRANS,
 
     }
-    //为不同的输出数据提供格式
+    //为不同的输出数据提供格式,因为输出到csv文件，所以要处理下单元格中有逗号的情况，这里用*:*替代，最后读出来的时候需要替换掉。
     public class RowDataClass
     {
         private int _id;
@@ -29,7 +30,8 @@ namespace ExcelProcess
         {
             _id = id;
             _label = label;
-            _src = src;
+            //_src = src;
+            _src = StringTool.commaSet(src);
             _srcLen = src.Length;
         }
         public RowDataClass(int id, string label, string src, int group)
@@ -45,7 +47,8 @@ namespace ExcelProcess
             object[] rowArray = dr.ItemArray;
             _id = (int)rowArray[0];
             _label = (string)rowArray[1];
-            _src = (string)rowArray[2];
+           // _src = (string)rowArray[2];
+            _src = StringTool.commaSet((string)rowArray[2]);
             _srcLen = _src.Length;
             _group = group;
         }
@@ -54,7 +57,8 @@ namespace ExcelProcess
             object[] rowArray = dr.ItemArray;
             _id = (int)rowArray[0];
             _label = (string)rowArray[1];
-            _src = (string)rowArray[2];
+           // _src = (string)rowArray[2];
+            _src = StringTool.commaSet((string)rowArray[2]);
             if (rowArray.Length > 4)
             {
                 _group = (int)rowArray[4];
@@ -64,7 +68,8 @@ namespace ExcelProcess
         {
             _id = id;
             _label = label;
-            _src = src;
+            //_src = src;
+            _src = StringTool.commaSet(src);
             _tranTo = trans;
         }
 
