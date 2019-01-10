@@ -1,0 +1,24 @@
+﻿<Window x:Class="UI_Design.Similarity"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI_Design"
+        mc:Ignorable="d"
+        Title="Similarity" Height="430" Width="410">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="200"/>
+        </Grid.RowDefinitions>
+        <Button Content="Load 用语集表" Grid.Column = "0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Height="200" Click="LoadDictFile"/>
+        <Button Content="Load 待翻译表" Grid.Column = "0"  HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Height="200" Grid.Row="1" Click="LoadTranslationFile"/>
+        <TextBox x:Name="textBox"   Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Left"  TextWrapping="Wrap" VerticalAlignment="Top" Height="400" Width="200"/>
+        <Button Content="Output Tables&#xD;&#xA;(索引表，简表)" Grid.Column="1" HorizontalAlignment="Right" Margin="0" Grid.Row="1" Width="100" Height="100" Click="SaveSplitTables" VerticalAlignment="Bottom"/>
+
+    </Grid>
+</Window>

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI_Design", "UI_Design\UI_Design.csproj", "{3C1C1C2D-6998-472E-B9BF-9F46436145DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FuncLibrary", "UI_Design\FuncLibrary\FuncLibrary.csproj", "{2EC1F86B-2CCF-4D89-83FF-AFAC034B2119}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3C1C1C2D-6998-472E-B9BF-9F46436145DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C1C1C2D-6998-472E-B9BF-9F46436145DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C1C1C2D-6998-472E-B9BF-9F46436145DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C1C1C2D-6998-472E-B9BF-9F46436145DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EC1F86B-2CCF-4D89-83FF-AFAC034B2119}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EC1F86B-2CCF-4D89-83FF-AFAC034B2119}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EC1F86B-2CCF-4D89-83FF-AFAC034B2119}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EC1F86B-2CCF-4D89-83FF-AFAC034B2119}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {40048191-215E-4886-938D-78FA37C6EE44}
+	EndGlobalSection
+EndGlobal

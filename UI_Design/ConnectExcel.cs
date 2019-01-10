@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExcelProcess
+namespace UI_Design
 {
     class ConnectExcel//using OLEDB to read xlsx data using database
     {
