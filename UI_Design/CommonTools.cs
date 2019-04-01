@@ -38,8 +38,33 @@ namespace UI_Design
                 MessageBox.Show("字典异常");
                 return null;
             }
-            return dt.Rows.Cast<DataRow>().ToDictionary(x => x[0].ToString(), x => x[1].ToString());
+            //无法处理具有相同键的问题，一旦出现就会报错
+            //return dt.Rows.Cast<DataRow>().ToDictionary(x => x[0].ToString(), x => x[1].ToString());
+            return dt.Rows.Cast<DataRow>().ToLookup(x => x[0].ToString(), x => x[1].ToString())
+                .ToDictionary(t => t.Key, t => t.First());//选取重复键的第一个,也可以t.Last()表示选的是最后一个。
         }
+
+       /* static class ToDictionaryExtentions
+        {
+            public static IDictionary<TKey, TValue> ToDictionaryEx<TElement, TKey, TValue>(
+                this IEnumerable<TElement> source,
+                Func<TElement, TKey> keyGetter,
+                Func<TElement, TValue> valueGetter)
+            {
+                IDictionary<TKey, TValue> dict = new Dictionary<TKey, TValue>();
+                foreach (var e in source)
+                {
+                    var key = keyGetter(e);
+                    if (dict.ContainsKey(key))
+                    {
+                        continue;
+                    }
+
+                    dict.Add(key, valueGetter(e));
+                }
+                return dict;
+            }
+        }*/
 
         static string g_WorkingFolder = "";
         static public Encoding gb = Encoding.GetEncoding("gb2312");
@@ -71,7 +96,6 @@ namespace UI_Design
                 {
                     return;
                 }
-
                 excel.Visible = false;
                 Microsoft.Office.Interop.Excel.Workbooks workbooks = excel.Workbooks;
 
@@ -91,8 +115,8 @@ namespace UI_Design
                         worksheet.Cells[rowIndex, colIndex + i] = dt.Columns[i].ColumnName;
 
                         range = worksheet.Cells[rowIndex, colIndex + i];
-
                         range.Interior.ColorIndex = 33;
+                        //range.ColumnWidth = 36;//设置列宽
                         range.Font.Bold = true;
                         range.Font.Color = 0;
                         range.Font.Name = "Arial";
@@ -126,7 +150,12 @@ namespace UI_Design
                         }
                     }
 
-                    worksheet.Cells.Columns.AutoFit();
+                    //设置列宽自动匹配和WrapText 的前后顺序会影响输出表格列宽，
+                    //WrapText =True，在前，输出表格以之前的字符的宽度为宽度，
+                    //WrapText =True，在后，输出表格会以最宽的宽度为宽度。
+                    worksheet.Cells.WrapText = true;
+                    worksheet.Cells.Columns.AutoFit();//列宽自动匹配
+                    
                     excel.DisplayAlerts = false;
                     workbook.Saved = true;
                     FileStream file = new FileStream(savePath, FileMode.Create);

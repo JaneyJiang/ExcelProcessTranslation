@@ -43,6 +43,9 @@ namespace UI_Design
         private Dictionary<string, string> dict;
         private DataTable idxMap;
         private DataTable single;
+        private int originCount;
+        private int singleCount;
+        private int groupCount;
         private double simRate;
         private double lenRate;
         private string identify;
@@ -60,6 +63,9 @@ namespace UI_Design
             dict= null;
             idxMap = null;
             single = null;
+            originCount = 0;
+            singleCount = 0;
+            groupCount = 0;
             simRate = 0.85;//相似度大小
             lenRate = 0.65;//句子长度比
             identify = "identify";
@@ -67,15 +73,38 @@ namespace UI_Design
      
         private void tagChooseDict_clicked(DataTable dt)
         {
-            textBox.Text += "File loaded\n";
+            textBox.Text += "File loaded! ";
             try
             {
                 dict = CommonTools.DataTableToDict(dt);
+                
             }
             catch (Exception err)
             {
                 MessageBox.Show(err.Message);
             }
+            
+            textBox.Text += "dict lines:"+ dict.Count.ToString()+"\n";
+            
+        }
+        private void tagChooseText_clicked(DataTable tb)
+        {
+            textBox.Text += "File loaded! ";
+            try
+            {
+                single = tb.Clone();//复制输入tb的结构
+                DataTable sortTable = SortAccordingToLength(tb, 1);//根据指定列的长度进行排序
+                Dictionary<string, string> indexMap = SingleExtraction(sortTable, single);
+                //CommonTools.SaveDataTable2Excel(single);
+                idxMap = CommonTools.DictToDataTable<string>(indexMap);
+                //CommonTools.SaveDataTable2Excel(map);
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message);
+            }
+            textBox.Text += "input row lines:" + tb.Rows.Count.ToString()+"\n";
+            originCount = tb.Rows.Count;
         }
 
         private void LoadFile(string[] tableTags, InputType type)
@@ -87,7 +116,7 @@ namespace UI_Design
                 switch (type)//不用这个长度，我们在调用的时候指定一个类型，根据类型使用回调函数TODO
                 {
                     case InputType.DictionaryFile:
-                        tagChoose.sendTable += new TagChoose.Tabledelegate(tagChooseDict_clicked);
+                        tagChoose.sendTable += new TagChoose.Tabledelegate(tagChooseDict_clicked);                       
                         break;
                     case InputType.TranslationFile:
                         tagChoose.sendTable += new TagChoose.Tabledelegate(tagChooseText_clicked);
@@ -106,30 +135,13 @@ namespace UI_Design
         {
             string[] tableTags = { "待翻译文本", "目标文本" };
             LoadFile(tableTags,InputType.DictionaryFile);
+            //textBox.Text += "载入字典" + this.dict.Count.ToString() + "条";
         }
         private void LoadTranslationFile(object sender, RoutedEventArgs e)
         {
             string[] tableTags = { "UniqueId", "Source", "Target" };
             LoadFile(tableTags,InputType.TranslationFile);
-        }
-        
-
-        private void tagChooseText_clicked(DataTable tb)
-        {
-            textBox.Text += "File loaded\n";
-            try
-            {
-                single = tb.Clone();//复制输入tb的结构
-                DataTable sortTable = SortAccordingToLength(tb, 1);//根据指定列的长度进行排序
-                Dictionary<string, string> indexMap = SingleExtraction(sortTable, single);
-                //CommonTools.SaveDataTable2Excel(single);
-                idxMap = CommonTools.DictToDataTable<string>(indexMap);
-                //CommonTools.SaveDataTable2Excel(map);
-            }
-            catch (Exception err) {
-                MessageBox.Show(err.Message);
-            }
-        }
+        }       
 
        
         private DataTable SortAccordingToLength(DataTable tb, int idx)
@@ -223,13 +235,16 @@ namespace UI_Design
         }
         private void SaveSplitTables(object sender, RoutedEventArgs e)
         {
-            textBox.Text += "Saving index file...\n";
-            CommonTools.SaveDataTable2Excel(idxMap, "保存索引表");
+            textBox.Text += "Saving index file...  "+ idxMap.Rows.Count.ToString()+"lines  \n";
+            //CommonTools.SaveDataTable2Excel(idxMap, "保存索引表");
+            groupCount = idxMap.Rows.Count;
             textBox.Text += "Index file saved\n";
-            textBox.Text += "Saving simple table...\n";
-            CommonTools.SaveDataTable2Excel(single,"保存输出简表");
-            textBox.Text += "All Saved\n";
-            Close();
+            textBox.Text += "Saving simple table...  " + single.Rows.Count.ToString() + "lines  \n";
+            singleCount = single.Rows.Count;
+            //CommonTools.SaveDataTable2Excel(single,"保存输出简表");
+            textBox.Text += "All Saved!\n";
+            textBox.Text += "Summary:\ninput items " + originCount.ToString() + "\nneed to translation items: " + singleCount.ToString() + "\ngroup translation items: " + groupCount.ToString()+"\n";
+            //Close();
         }
 
         private void LoadDict(object sender, RoutedEventArgs e)
