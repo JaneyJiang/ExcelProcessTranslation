@@ -1,0 +1,2 @@
+# ExcelProcessTranslation
+在UI设计上，下拉列表用了UserControl放入stackplane来进行定制。整体架构方便可卸，当然还有不足的地方，依旧需要改进
