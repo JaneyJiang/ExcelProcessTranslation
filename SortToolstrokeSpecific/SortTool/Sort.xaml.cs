@@ -43,10 +43,10 @@ namespace SortTool
         }
         private void LoadToSortFile(object sender, RoutedEventArgs e)
         {
+            textBox.Clear();
             string[] tableTags = { "Id", "toSort" };
             try { 
                 LoadFile(tableTags);
-                //textBox.Text += "载入字典" + this.dict.Count.ToString() + "条";
             }
             catch (Exception err)
             {
